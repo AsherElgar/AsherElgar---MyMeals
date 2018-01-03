@@ -11,6 +11,8 @@ import AARatingBar
 
 
  var newMeal = [Meal]()
+
+@objcMembers
 class Your_MealsTableViewController: UITableViewController {
 
     
@@ -36,7 +38,7 @@ class Your_MealsTableViewController: UITableViewController {
         var i = 0
         if newMeal.count == 0{
             
-        let sampleMeal = Meal(title: "Cannellini Bruschetta", image: #imageLiteral(resourceName: "meal"), rating: 3)
+        let sampleMeal = Meal(title: "Cannellini Bruschetta", image: #imageLiteral(resourceName: "meal"), rating: 3.0)
             newMeal = [sampleMeal]
             i+=1
         }

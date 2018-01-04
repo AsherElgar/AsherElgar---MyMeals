@@ -9,6 +9,8 @@
 import UIKit
 import AARatingBar
 import Firebase
+import CoreData
+
 
 
 class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UITextFieldDelegate  {
@@ -21,6 +23,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     
      var newMeal2: Meal?
    
+    var coreMeal: [NSManagedObject] = []
     
     let tapRec = UITapGestureRecognizer()
     
@@ -29,6 +32,8 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        print(coreMeal)
+        
         nameMeal.delegate  = self
      
         imagePicker.delegate = self
@@ -41,6 +46,34 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         
     }
     
+    func save(name: String, img: Data, rate: CGFloat) {
+        
+        guard let appDelegate =
+            UIApplication.shared.delegate as? AppDelegate else {
+                return
+        }
+        
+        let managedContext =
+            appDelegate.persistentContainer.viewContext
+        
+        let entity =
+            NSEntityDescription.entity(forEntityName: "MealCore",
+                                       in: managedContext)!
+        
+        let core = NSManagedObject(entity: entity,
+                                     insertInto: managedContext)
+        
+        core.setValue(name, forKeyPath: "mealTitle")
+        core.setValue(img, forKeyPath: "mealImage")
+        core.setValue(rate, forKeyPath: "rate")
+        
+        do {
+            try managedContext.save()
+            coreMeal.append(core)
+        } catch let error as NSError {
+            print("Could not save. \(error), \(error.userInfo)")
+        }
+    }
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         // Hide the keyboard.
@@ -122,7 +155,11 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         
         newMeal2 = Meal(title: name, image: image, rating: rate)
 
-    performSegue(withIdentifier: "saveToTable", sender: newMeal)
+        let data = UIImagePNGRepresentation(image!) as NSData!
+        save(name: name, img: data! as Data, rate: rate)
+//        self.tableView.reloadData()
+        
+        performSegue(withIdentifier: "saveToTable", sender: newMeal2)
 
     }
 
@@ -133,7 +170,9 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
             
             guard let meal = newMeal2 else{return}
 
-            newMeal.append(meal)
+            dest.coreMeal = coreMeal
+           // newMeal2.append(meal)
+            dest.tableView.reloadData()
             
 
         }
